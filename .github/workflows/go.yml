@@ -34,8 +34,13 @@ jobs:
 
     - name: Build
       run: |
-        cd cmd/magneticod ; go mod tidy; cd -; make magneticod
-        cd cmd/magneticow ; go mod tidy; cd - ; make magneticow
+        cd cmd/magneticod ; go mod tidy; cd -
+        # make magneticod
+        #go install --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
+        go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
+
+        #cd cmd/magneticow ; go mod tidy; cd - ; make magneticow
+        #GOOS=windows GOARCH=amd64 go build
         ls -laR
 
     #- name: Test
