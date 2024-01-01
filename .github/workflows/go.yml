@@ -18,7 +18,9 @@ jobs:
 
     - name: Install go-bindata
       run: |
-        go get -u -v github.com/kevinburke/go-bindata/...
+        # go get -u -v github.com/kevinburke/go-bindata/...
+        go install github.com/kevinburke/go-bindata/go-bindata@v3.24.0
+        ls -laR
 
     - name: Build
       run: |
