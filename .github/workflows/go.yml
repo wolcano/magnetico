@@ -22,7 +22,7 @@ jobs:
 
     - name: Build
       run: |
-        make magneticod
+        cd cmd ; go mod tidy ; go get -t . ; make magneticod
         make magneticow
 
     - name: Test
