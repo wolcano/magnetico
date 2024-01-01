@@ -21,7 +21,7 @@ jobs:
         go get -u -v github.com/kevinburke/go-bindata/...
 
     - name: Build
-      run:
+      run: |
         echo "a"
         cd cmd
         go mod tidy
