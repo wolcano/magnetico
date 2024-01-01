@@ -21,8 +21,21 @@ jobs:
         go get -u -v github.com/kevinburke/go-bindata/...
 
     - name: Build
-      run: |
-        cd cmd ; go mod tidy ; go mod tidy -e ; go get -t . ; cd - ; cd cmd/magneticod; go mod tidy ; go mod tidy -e ; go get -t . ; cd - ;  make magneticod
+      run:
+        echo "a"
+        cd cmd
+        go mod tidy
+        go mod tidy -e
+        go get -t .
+        cd -
+        echo "b"
+        cd cmd/magneticod
+        go mod tidy 
+        go mod tidy -e
+        go get -t .
+        cd -
+        echo "c"
+        make magneticod
         # make magneticow
 
     - name: Test
