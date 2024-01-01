@@ -22,20 +22,11 @@ jobs:
 
     - name: Build
       run: |
-        #echo "a"
-        #cd cmd
-        #echo "*mod tidy"
-        #go mod tidy
-        #echo "*mod tidy -e"
-        #go mod tidy -e
-        #echo "*get"
-        #go get -t .
-        #cd -
         echo "b"
         cd cmd/magneticod
-        go mod tidy 
-        go mod tidy -e
-        go get -t .
+        go mod tidy
+        # go mod tidy -e
+        # go get -t .
         cd -
         echo "c"
         make magneticod
