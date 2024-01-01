@@ -22,15 +22,14 @@ jobs:
 
     - name: Build
       run: |
-        echo "b"
         cd cmd/magneticod
         go mod tidy
-        # go mod tidy -e
-        # go get -t .
         cd -
-        echo "c"
         make magneticod
-        # make magneticow
+        cd cmd/magneticow
+        go mod tidy
+        cd -
+        make magneticow
 
     #- name: Test
     #  run: |
