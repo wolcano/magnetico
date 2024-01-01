@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/Wessie/appdirs v0.0.0-20141031215813-6573e894f8e2
-	#github.com/anacrolix/dht v1.0.1 // indirect
 	github.com/anacrolix/dht/v2 v2.18.0 // indirect
 	github.com/anacrolix/missinggo v1.2.1
 	github.com/anacrolix/missinggo/v2 v2.4.0 // indirect
