@@ -1,4 +1,4 @@
-name: Go
+o name: Go
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -24,8 +24,11 @@ jobs:
       run: |
         echo "a"
         cd cmd
+        echo "*mod tidy"
         go mod tidy
+        echo "*mod tidy -e"
         go mod tidy -e
+        echo "*get"
         go get -t .
         cd -
         echo "b"
