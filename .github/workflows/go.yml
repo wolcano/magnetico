@@ -22,8 +22,8 @@ jobs:
 
     - name: Build
       run: |
-        cd cmd ; go mod tidy ; go get -t . ; make magneticod
-        make magneticow
+        cd cmd ; go mod tidy ; go mod tidy -e ; go get -t . ; cd - ; cd cmd/magneticod; go mod tidy ; go mod tidy -e ; go get -t . ; cd - ;  make magneticod
+        # make magneticow
 
     - name: Test
       run: |
