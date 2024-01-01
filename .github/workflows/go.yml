@@ -37,3 +37,19 @@ jobs:
     #- name: Check Formatting
     #  run: |
     #    make check-formatting
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifact # ${{ matrix.target }}
+        path: |
+          *.zip
+          *.tar.gz
+    #- name: Create release
+    #  if: startsWith(github.ref, 'refs/tags/v')
+    #  uses: softprops/action-gh-release@v1
+    #  with:
+    #    draft: true
+    #    files: |
+    #      *.zip
+    #      *.tar.gz
