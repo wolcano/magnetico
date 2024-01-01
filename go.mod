@@ -9,6 +9,7 @@ require (
 	github.com/anacrolix/missinggo/v2 v2.4.0 // indirect
 	github.com/anacrolix/torrent v1.14.0
         github.com/anacrolix/go-libutp v1.2.0 // indirect
+	github.com/anacrolix/utp v0.1.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/google/pprof v0.0.0-20190515194954-54271f7e092f // indirect
