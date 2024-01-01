@@ -9,6 +9,7 @@ magneticow:
 	# TODO: minify files!
 	# https://github.com/kevinburke/go-bindata
 	#go-bindata -pkg "main" -o="cmd/magneticow/bindata.go" -prefix="cmd/magneticow/data/" cmd/magneticow/data/...
+	go get github.com/kevinburke/go-bindata/go-bindata
 	go run github.com/kevinburke/go-bindata/go-bindata/ -pkg "main" -o="cmd/magneticow/bindata.go" -prefix="cmd/magneticow/data/" cmd/magneticow/data/...
 	ls -laR cmd/magneticow/
 	# Prepend the linter instruction to the beginning of the file
