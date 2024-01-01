@@ -20,12 +20,11 @@ jobs:
       run: |
         # go get -u -v github.com/kevinburke/go-bindata/...
         go install github.com/kevinburke/go-bindata/go-bindata@v3.24.0
-        ls -laR
 
     - name: Build
       run: |
-        # cd cmd/magneticod ; go mod tidy; cd -; make magneticod
-        cd cmd/magneticow ; go mod tidy; go get -t . ; cd - ; make magneticow
+        cd cmd/magneticod ; go mod tidy; cd -; make magneticod
+        cd cmd/magneticow ; go mod tidy; cd - ; make magneticow
 
     #- name: Test
     #  run: |
