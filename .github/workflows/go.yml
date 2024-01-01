@@ -36,6 +36,7 @@ jobs:
       run: |
         cd cmd/magneticod ; go mod tidy; cd -; make magneticod
         cd cmd/magneticow ; go mod tidy; cd - ; make magneticow
+        ls -laR
 
     #- name: Test
     #  run: |
