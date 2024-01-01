@@ -27,7 +27,7 @@ jobs:
         cd cmd/magneticow
         go mod tidy
         cd -
-        # make magneticow
+        make magneticow
 
     #- name: Test
     #  run: |
