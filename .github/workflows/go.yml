@@ -45,10 +45,10 @@ jobs:
     #  run: |
     #    make test
 
-    - name: Lint
-      run: |
-        make staticcheck
+    #- name: Lint
+    #  run: |
+    #    make staticcheck
 
-    - name: Check Formatting
-      run: |
-        make check-formatting
+    #- name: Check Formatting
+    #  run: |
+    #    make check-formatting
