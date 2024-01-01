@@ -6,14 +6,14 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
-      CCACHE_NOHASHDIR: true
-      CCACHE_MAXSIZE: 1G
+    #env:
+    #  CCACHE_DIR: ${{ github.workspace }}/.ccache
+    #  CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+    #  CCACHE_NOHASHDIR: true
+    #  CCACHE_MAXSIZE: 1G
     steps:
 
-    - name: Set up Go 1.x
+    - name: Set up Go
       uses: actions/setup-go@v2
       with:
         go-version: ^1.15
@@ -21,26 +21,47 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ runner.os }}-${{ github.sha }}
-        restore-keys: ${{ runner.os }}
+    #- name: Set up ccache
+    #  uses: hendrikmuhs/ccache-action@v1.2
+    #  with:
+    #    key: ${{ runner.os }}-${{ github.sha }}
+    #    restore-keys: ${{ runner.os }}
+
+    #- name: Cache Gradle Files
+    #  uses: actions/cache@v1
+    #  with:
+    #    path: ./.gradle
+    #    key: ${{ runner.os }}-gradle-file
 
     - name: Install go-bindata
       run: |
         # go get -u -v github.com/kevinburke/go-bindata/...
         go install github.com/kevinburke/go-bindata/go-bindata@v3.24.0
 
-    - name: Build
+    - name: Mod tidy
       run: |
         cd cmd/magneticod ; go mod tidy; cd -
+        cd cmd/magneticow ; go mod tidy; cd - 
+
+    - name: Build magneticod
+      run: |
         # make magneticod
         #go install --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
         go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
 
-        #cd cmd/magneticow ; go mod tidy; cd - ; make magneticow
-        #GOOS=windows GOARCH=amd64 go build
+    - name: Build magneticow bindata
+      run: |
+        go-bindata -pkg "main" -o="cmd/magneticow/bindata.go" -prefix="cmd/magneticow/data/" cmd/magneticow/data/...
+        sed -i '1s;^;//lint:file-ignore * Ignore file altogether\n;' cmd/magneticow/bindata.go
+
+    - name: Build magneticod
+      run: |
+        # make magneticow
+        go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticow
+
+    - name: Build magneticod.exe
+      run: |
+        GOOS=windows GOARCH=amd64 go build
         ls -laR
 
     #- name: Test
