@@ -19,25 +19,19 @@ type Protocol struct {
 }
 
 type ProtocolEventHandlers struct {
-	OnPingQuery                  func(*Message, *net.UDPAddr)
-	OnFindNodeQuery              func(*Message, *net.UDPAddr)
-	OnGetPeersQuery              func(*Message, *net.UDPAddr)
-	OnAnnouncePeerQuery          func(*Message, *net.UDPAddr)
-	OnGetPeersResponse           func(*Message, *net.UDPAddr)
-	OnFindNodeResponse           func(*Message, *net.UDPAddr)
-	OnPingORAnnouncePeerResponse func(*Message, *net.UDPAddr)
-
-	// Added by BEP 51
-	OnSampleInfohashesQuery    func(*Message, *net.UDPAddr)
-	OnSampleInfohashesResponse func(*Message, *net.UDPAddr)
-
-	OnCongestion func()
+	OnPingQuery                  func(*Message, net.Addr)
+	OnFindNodeQuery              func(*Message, net.Addr)
+	OnGetPeersQuery              func(*Message, net.Addr)
+	OnAnnouncePeerQuery          func(*Message, net.Addr)
+	OnGetPeersResponse           func(*Message, net.Addr)
+	OnFindNodeResponse           func(*Message, net.Addr)
+	OnPingORAnnouncePeerResponse func(*Message, net.Addr)
 }
 
-func NewProtocol(laddr string, eventHandlers ProtocolEventHandlers) (p *Protocol) {
+func NewProtocol(laddr *net.UDPAddr, eventHandlers ProtocolEventHandlers) (p *Protocol) {
 	p = new(Protocol)
+	p.transport = NewTransport(laddr, p.onMessage)
 	p.eventHandlers = eventHandlers
-	p.transport = NewTransport(laddr, p.onMessage, p.eventHandlers.OnCongestion)
 
 	p.currentTokenSecret, p.previousTokenSecret = make([]byte, 20), make([]byte, 20)
 	_, err := rand.Read(p.currentTokenSecret)
@@ -67,13 +61,13 @@ func (p *Protocol) Terminate() {
 	p.transport.Terminate()
 }
 
-func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
+func (p *Protocol) onMessage(msg *Message, addr net.Addr) {
 	switch msg.Y {
 	case "q":
 		switch msg.Q {
 		case "ping":
 			if !validatePingQueryMessage(msg) {
-				// zap.L().Debug("An invalid ping query received!")
+				zap.L().Debug("An invalid ping query received!")
 				return
 			}
 			// Check whether there is a registered event handler for the ping queries, before
@@ -84,7 +78,7 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 
 		case "find_node":
 			if !validateFindNodeQueryMessage(msg) {
-				// zap.L().Debug("An invalid find_node query received!")
+				zap.L().Debug("An invalid find_node query received!")
 				return
 			}
 			if p.eventHandlers.OnFindNodeQuery != nil {
@@ -93,7 +87,7 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 
 		case "get_peers":
 			if !validateGetPeersQueryMessage(msg) {
-				// zap.L().Debug("An invalid get_peers query received!")
+				zap.L().Debug("An invalid get_peers query received!")
 				return
 			}
 			if p.eventHandlers.OnGetPeersQuery != nil {
@@ -102,7 +96,7 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 
 		case "announce_peer":
 			if !validateAnnouncePeerQueryMessage(msg) {
-				// zap.L().Debug("An invalid announce_peer query received!")
+				zap.L().Debug("An invalid announce_peer query received!")
 				return
 			}
 			if p.eventHandlers.OnAnnouncePeerQuery != nil {
@@ -112,44 +106,16 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 		case "vote":
 			// Although we are aware that such method exists, we ignore.
 
-		case "sample_infohashes": // Added by BEP 51
-			if !validateSampleInfohashesQueryMessage(msg) {
-				// zap.L().Debug("An invalid sample_infohashes query received!")
-				return
-			}
-			if p.eventHandlers.OnSampleInfohashesQuery != nil {
-				p.eventHandlers.OnSampleInfohashesQuery(msg, addr)
-			}
-
 		default:
-			// zap.L().Debug("A KRPC query of an unknown method received!", zap.String("method", msg.Q))
+			zap.L().Debug("A KRPC query of an unknown method received!",
+				zap.String("method", msg.Q))
 			return
 		}
 	case "r":
-		// Query messages have a `q` field which indicates their type but response messages have no such field that we
-		// can rely on.
-		// The idea is you'd use transaction ID (the `t` key) to deduce the type of a response message, as it must be
-		// sent in response to a query message (with the same transaction ID) that we have sent earlier.
-		// This approach is, unfortunately, not very practical for our needs since we send up to thousands messages per
-		// second, meaning that we'd run out of transaction IDs very quickly (since some [many?] clients assume
-		// transaction IDs are no longer than 2 bytes), and we'd also then have to consider retention too (as we might
-		// not get a response at all).
-		// Our approach uses an ad-hoc pattern matching: all response messages share a subset of fields (such as `t`,
-		// `y`) but only one type of them contain a particular field (such as `token` field is unique to `get_peers`
-		// responses, `samples` is unique to `sample_infohashes` etc).
-		//
-		// sample_infohashes > get_peers > find_node > ping / announce_peer
-		if len(msg.R.Samples) != 0 { // The message should be a sample_infohashes response.
-			if !validateSampleInfohashesResponseMessage(msg) {
-				// zap.L().Debug("An invalid sample_infohashes response received!")
-				return
-			}
-			if p.eventHandlers.OnSampleInfohashesResponse != nil {
-				p.eventHandlers.OnSampleInfohashesResponse(msg, addr)
-			}
-		} else if len(msg.R.Token) != 0 { // The message should be a get_peers response.
+		// get_peers > find_node > ping / announce_peer
+		if len(msg.R.Token) != 0 { // The message should be a get_peers response.
 			if !validateGetPeersResponseMessage(msg) {
-				// zap.L().Debug("An invalid get_peers response received!")
+				zap.L().Debug("An invalid get_peers response received!")
 				return
 			}
 			if p.eventHandlers.OnGetPeersResponse != nil {
@@ -157,7 +123,7 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 			}
 		} else if len(msg.R.Nodes) != 0 { // The message should be a find_node response.
 			if !validateFindNodeResponseMessage(msg) {
-				// zap.L().Debug("An invalid find_node response received!")
+				zap.L().Debug("An invalid find_node response received!")
 				return
 			}
 			if p.eventHandlers.OnFindNodeResponse != nil {
@@ -165,7 +131,7 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 			}
 		} else { // The message should be a ping or an announce_peer response.
 			if !validatePingORannouncePeerResponseMessage(msg) {
-				// zap.L().Debug("An invalid ping OR announce_peer response received!")
+				zap.L().Debug("An invalid ping OR announce_peer response received!")
 				return
 			}
 			if p.eventHandlers.OnPingORAnnouncePeerResponse != nil {
@@ -186,7 +152,7 @@ func (p *Protocol) onMessage(msg *Message, addr *net.UDPAddr) {
 	}
 }
 
-func (p *Protocol) SendMessage(msg *Message, addr *net.UDPAddr) {
+func (p *Protocol) SendMessage(msg *Message, addr net.Addr) {
 	p.transport.WriteMessages(msg, addr)
 }
 
@@ -206,32 +172,21 @@ func NewFindNodeQuery(id []byte, target []byte) *Message {
 	}
 }
 
-func NewGetPeersQuery(id []byte, infoHash []byte) *Message {
+func NewGetPeersQuery(id []byte, info_hash []byte) *Message {
+	panic("Not implemented yet!")
 	return &Message{
 		Y: "q",
 		T: []byte("aa"),
 		Q: "get_peers",
 		A: QueryArguments{
 			ID:       id,
-			InfoHash: infoHash,
+			InfoHash: info_hash,
 		},
-	}
 }
 
-func NewAnnouncePeerQuery(id []byte, implied_port bool, info_hash []byte, port uint16, token []byte) *Message {
+func NewAnnouncePeerQuery(id []byte, implied_port bool, info_hash []byte, port uint16,
+	token []byte) *Message {
 	panic("Not implemented yet!")
-}
-
-func NewSampleInfohashesQuery(id []byte, t []byte, target []byte) *Message {
-	return &Message{
-		Y: "q",
-		T: t,
-		Q: "sample_infohashes",
-		A: QueryArguments{
-			ID:     id,
-			Target: target,
-		},
-	}
 }
 
 func NewPingResponse(t []byte, id []byte) *Message {
@@ -281,6 +236,7 @@ func (p *Protocol) VerifyToken(address net.IP, token []byte) bool {
 	defer p.tokenLock.Unlock()
 	// TODO: implement VerifyToken()
 	panic("VerifyToken() not implemented yet!")
+	return false
 }
 
 func (p *Protocol) updateTokenSecret() {
@@ -317,11 +273,6 @@ func validateAnnouncePeerQueryMessage(msg *Message) bool {
 		len(msg.A.Token) > 0
 }
 
-func validateSampleInfohashesQueryMessage(msg *Message) bool {
-	return len(msg.A.ID) == 20 &&
-		len(msg.A.Target) == 20
-}
-
 func validatePingORannouncePeerResponseMessage(msg *Message) bool {
 	return len(msg.R.ID) == 20
 }
@@ -342,12 +293,4 @@ func validateGetPeersResponseMessage(msg *Message) bool {
 		len(msg.R.Token) > 0
 
 	// TODO: check for values or nodes
-}
-
-func validateSampleInfohashesResponseMessage(msg *Message) bool {
-	return len(msg.R.ID) == 20 &&
-		msg.R.Interval >= 0 &&
-		// TODO: check for nodes
-		msg.R.Num >= 0 &&
-		len(msg.R.Samples)%20 == 0
 }
