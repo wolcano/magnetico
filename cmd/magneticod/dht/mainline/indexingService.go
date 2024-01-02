@@ -56,9 +56,9 @@ func NewIndexingService(laddr string, interval time.Duration, maxNeighbors uint,
 	service.protocol = NewProtocol(
 		udpAddr,
 		ProtocolEventHandlers{
-			OnFindNodeResponse:         service.onFindNodeResponse,
-			OnGetPeersResponse:         service.onGetPeersResponse,
-			OnSampleInfohashesResponse: service.onSampleInfohashesResponse,
+			OnFindNodeResponse:         &service.onFindNodeResponse,
+			OnGetPeersResponse:         &service.onGetPeersResponse,
+			//OnSampleInfohashesResponse: service.onSampleInfohashesResponse,
 		},
 	)
 	service.nodeID = make([]byte, 20)
