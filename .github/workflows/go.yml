@@ -83,16 +83,17 @@ jobs:
 
     - name: Package (*nix)
       run: |
-        tar -cv README.md magneticod magneticow | gzip --best > '${{ runner.os }}.tar.gz'
-        7z a ${{ runner.os }}.win64.zip README.md magneticod.exe magneticow.exe
+        ls -la
+        tar -cv README.md magneticod magneticow | gzip --best > 'magnetico.tar.gz'
+        7z a magnetico.win64.zip README.md magneticod.exe magneticow.exe
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ runner.os }} # ${{ matrix.target }}
         path: |
-          ${{ runner.os }}.tar.gz
-          ${{ runner.os }}.*.zip
+          magnetico.tar.gz
+          magnetico.*.zip
 
     #- name: Create release
     #  if: startsWith(github.ref, 'refs/tags/v')
