@@ -87,12 +87,18 @@ jobs:
         tar -cv README.md magneticod magneticow | gzip --best > 'magnetico.tar.gz'
         7z a magnetico.win64.zip README.md magneticow.exe    # magneticod.exe
 
-    - name: Upload artifact
+    - name: Upload artifact Linux
       uses: actions/upload-artifact@v2
       with:
         name: ${{ runner.os }} # ${{ matrix.target }}
         path: |
           magnetico.tar.gz
+
+    - name: Upload artifact Win
+      uses: actions/upload-artifact@v2
+      with:
+        name: win64
+        path: |
           magnetico.*.zip
 
     #- name: Create release
