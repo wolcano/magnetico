@@ -182,6 +182,7 @@ func NewGetPeersQuery(id []byte, info_hash []byte) *Message {
 			ID:       id,
 			InfoHash: info_hash,
 		},
+	}
 }
 
 func NewAnnouncePeerQuery(id []byte, implied_port bool, info_hash []byte, port uint16,
