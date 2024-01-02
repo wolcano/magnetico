@@ -81,25 +81,29 @@ jobs:
     #  run: |
     #    make check-formatting
 
-    - name: Package (*nix)
+    - name: List Package
       run: |
         ls -la
-        tar -cv README.md magneticod magneticow | gzip --best > 'magnetico.tar.gz'
-        7z a magnetico.win64.zip README.md magneticow.exe    # magneticod.exe
+    #    tar -cv README.md magneticod magneticow | gzip --best > 'magnetico.tar.gz'
+    #    7z a magnetico.win64.zip README.md magneticow.exe    # magneticod.exe
 
     - name: Upload artifact Linux
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ runner.os }} # ${{ matrix.target }}
+        name: magnetico.${{ runner.os }} # ${{ matrix.target }}
         path: |
-          magnetico.tar.gz
+          README.md
+          magneticod
+          magneticow
 
     - name: Upload artifact Win
       uses: actions/upload-artifact@v2
       with:
-        name: win64
+        name: magnetico.win64
         path: |
-          magnetico.*.zip
+          README.md
+          # magneticod.exe
+          magneticow.exe    
 
     #- name: Create release
     #  if: startsWith(github.ref, 'refs/tags/v')
