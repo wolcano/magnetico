@@ -28,7 +28,7 @@ jobs:
     #    key: ${{ runner.os }}-${{ github.sha }}
     #    restore-keys: ${{ runner.os }}
 
-    - name: Cache Gradle Files
+    - name: Cache Files
       uses: actions/cache@v1
       with:
         path: ${{ github.workspace }}/.gocache
@@ -85,7 +85,7 @@ jobs:
       run: |
         ls -la
         tar -cv README.md magneticod magneticow | gzip --best > 'magnetico.tar.gz'
-        7z a magnetico.win64.zip README.md magneticod.exe magneticow.exe
+        7z a magnetico.win64.zip README.md magneticow.exe    # magneticod.exe
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
