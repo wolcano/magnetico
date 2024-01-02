@@ -19,13 +19,13 @@ type Protocol struct {
 }
 
 type ProtocolEventHandlers struct {
-	OnPingQuery                  func(*Message, net.Addr)
-	OnFindNodeQuery              func(*Message, net.Addr)
-	OnGetPeersQuery              func(*Message, net.Addr)
-	OnAnnouncePeerQuery          func(*Message, net.Addr)
-	OnGetPeersResponse           func(*Message, net.Addr)
-	OnFindNodeResponse           func(*Message, net.Addr)
-	OnPingORAnnouncePeerResponse func(*Message, net.Addr)
+	OnPingQuery                  func(*Message, net.UDPAddr)
+	OnFindNodeQuery              func(*Message, net.UDPAddr)
+	OnGetPeersQuery              func(*Message, net.UDPAddr)
+	OnAnnouncePeerQuery          func(*Message, net.UDPAddr)
+	OnGetPeersResponse           func(*Message, net.UDPAddr)
+	OnFindNodeResponse           func(*Message, net.UDPAddr)
+	OnPingORAnnouncePeerResponse func(*Message, net.UDPAddr)
 }
 
 func NewProtocol(laddr *net.UDPAddr, eventHandlers ProtocolEventHandlers) (p *Protocol) {
@@ -61,7 +61,7 @@ func (p *Protocol) Terminate() {
 	p.transport.Terminate()
 }
 
-func (p *Protocol) onMessage(msg *Message, addr net.Addr) {
+func (p *Protocol) onMessage(msg *Message, addr net.UDPAddr) {
 	switch msg.Y {
 	case "q":
 		switch msg.Q {
@@ -152,7 +152,7 @@ func (p *Protocol) onMessage(msg *Message, addr net.Addr) {
 	}
 }
 
-func (p *Protocol) SendMessage(msg *Message, addr net.Addr) {
+func (p *Protocol) SendMessage(msg *Message, addr net.UDPAddr) {
 	p.transport.WriteMessages(msg, addr)
 }
 
