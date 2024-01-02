@@ -42,28 +42,32 @@ jobs:
     - name: Mod tidy
       run: |
         cd cmd/magneticod ; go mod tidy; cd -
-        cd cmd/magneticow ; go mod tidy; cd - 
+        # cd cmd/magneticow ; go mod tidy; cd - 
 
     - name: Build magneticod
       run: |
         # make magneticod
-        #go install --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
+        # go install --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
         go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
+
+    - name: Build magneticod.exe
+      run: |
+        GOOS=windows GOARCH=amd64 go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
 
     - name: Build magneticow bindata
       run: |
         go-bindata -pkg "main" -o="cmd/magneticow/bindata.go" -prefix="cmd/magneticow/data/" cmd/magneticow/data/...
         sed -i '1s;^;//lint:file-ignore * Ignore file altogether\n;' cmd/magneticow/bindata.go
 
-    - name: Build magneticod
+    - name: Build magneticow
       run: |
         # make magneticow
         go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticow
 
-    - name: Build magneticod.exe
+    - name: Build magneticow.exe
       run: |
         GOOS=windows GOARCH=amd64 go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticow
-        ls -laR
+        # ls -laR
 
     #- name: Test
     #  run: |
@@ -78,21 +82,17 @@ jobs:
     #    make check-formatting
 
     - name: Package (*nix)
-      if: runner.os != 'Windows'
-      run: >
+      run: |
         tar -cv README.md magneticod magneticow | gzip --best > '${{ runner.os }}.tar.gz'
-    - name: Package (Windows)
-      if: runner.os == 'Windows'
-      run: >
-        7z a ${{ runner.os }}.zip README.md magneticod.exe magneticow.exe
-    
+        7z a ${{ runner.os }}.win64.zip README.md magneticod.exe magneticow.exe
+
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ runner.os }} # ${{ matrix.target }}
         path: |
           ${{ runner.os }}.tar.gz
-          ${{ runner.os }}.zip
+          ${{ runner.os }}.*.zip
 
     #- name: Create release
     #  if: startsWith(github.ref, 'refs/tags/v')
