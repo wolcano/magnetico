@@ -47,10 +47,14 @@ func (ir IndexingResult) PeerAddrs() []net.TCPAddr {
 }
 
 func NewIndexingService(laddr string, interval time.Duration, maxNeighbors uint, eventHandlers IndexingServiceEventHandlers) *IndexingService {
+	udpAddr, err := net.ResolveUDPAddr("udp", laddr)
+	if err != nil {
+		zap.L().Fatal("Failed to parse Address", zap.Error(err))
+	}
 	service := new(IndexingService)
 	service.interval = interval
 	service.protocol = NewProtocol(
-		laddr,
+		udpAddr,
 		ProtocolEventHandlers{
 			OnFindNodeResponse:         service.onFindNodeResponse,
 			OnGetPeersResponse:         service.onGetPeersResponse,
