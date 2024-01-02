@@ -6,7 +6,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    #env:
+    env:
+      GOCACHE: ${{ github.workspace }}/.gocache
     #  CCACHE_DIR: ${{ github.workspace }}/.ccache
     #  CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
     #  CCACHE_NOHASHDIR: true
@@ -27,11 +28,11 @@ jobs:
     #    key: ${{ runner.os }}-${{ github.sha }}
     #    restore-keys: ${{ runner.os }}
 
-    #- name: Cache Gradle Files
-    #  uses: actions/cache@v1
-    #  with:
-    #    path: ./.gradle
-    #    key: ${{ runner.os }}-gradle-file
+    - name: Cache Gradle Files
+      uses: actions/cache@v1
+      with:
+        path: ${{ github.workspace }}/.gocache
+        key: ${{ runner.os }}-gocache-file
 
     - name: Install go-bindata
       run: |
@@ -61,7 +62,7 @@ jobs:
 
     - name: Build magneticod.exe
       run: |
-        GOOS=windows GOARCH=amd64 go build
+        GOOS=windows GOARCH=amd64 go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticow
         ls -laR
 
     #- name: Test
