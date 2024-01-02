@@ -8,12 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GOCACHE: ${{ github.workspace }}/.gocache
-    #  CCACHE_DIR: ${{ github.workspace }}/.ccache
-    #  CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
-    #  CCACHE_NOHASHDIR: true
-    #  CCACHE_MAXSIZE: 1G
-    steps:
 
+    steps:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -21,12 +17,6 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-
-    #- name: Set up ccache
-    #  uses: hendrikmuhs/ccache-action@v1.2
-    #  with:
-    #    key: ${{ runner.os }}-${{ github.sha }}
-    #    restore-keys: ${{ runner.os }}
 
     - name: Cache Files
       uses: actions/cache@v1
@@ -36,23 +26,20 @@ jobs:
 
     - name: Install go-bindata
       run: |
-        # go get -u -v github.com/kevinburke/go-bindata/...
         go install github.com/kevinburke/go-bindata/go-bindata@v3.24.0
 
     - name: Mod tidy
       run: |
-        cd cmd/magneticod ; go mod tidy; cd -
-         cd cmd/magneticow ; go mod tidy; cd - 
+        go mod tidy
+        # cd cmd/magneticow ; go mod tidy; cd - 
 
     - name: Build magneticod
       run: |
-        # make magneticod
-        # go install --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
         go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
 
-    #- name: Build magneticod.exe
-    #  run: |
-    #    GOOS=windows GOARCH=amd64 go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
+    - name: Build magneticod.exe
+      run: |
+        GOOS=windows GOARCH=amd64 go build --tags fts5 "-ldflags=-s -w -X main.compiledOn=`date -u +%Y-%m-%dT%H:%M:%SZ`" ./cmd/magneticod
 
     - name: Build magneticow bindata
       run: |
@@ -81,7 +68,7 @@ jobs:
     #  run: |
     #    make check-formatting
 
-    - name: List Package
+    - name: List Package dir
       run: |
         ls -la
     #    tar -cv README.md magneticod magneticow | gzip --best > 'magnetico.tar.gz'
