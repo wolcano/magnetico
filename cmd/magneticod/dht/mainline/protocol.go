@@ -19,13 +19,13 @@ type Protocol struct {
 }
 
 type ProtocolEventHandlers struct {
-	OnPingQuery                  func(*Message, net.UDPAddr)
-	OnFindNodeQuery              func(*Message, net.UDPAddr)
-	OnGetPeersQuery              func(*Message, net.UDPAddr)
-	OnAnnouncePeerQuery          func(*Message, net.UDPAddr)
-	OnGetPeersResponse           func(*Message, net.UDPAddr)
-	OnFindNodeResponse           func(*Message, net.UDPAddr)
-	OnPingORAnnouncePeerResponse func(*Message, net.UDPAddr)
+	OnPingQuery                  func(*Message, *net.UDPAddr)
+	OnFindNodeQuery              func(*Message, *net.UDPAddr)
+	OnGetPeersQuery              func(*Message, *net.UDPAddr)
+	OnAnnouncePeerQuery          func(*Message, *net.UDPAddr)
+	OnGetPeersResponse           func(*Message, *net.UDPAddr)
+	OnFindNodeResponse           func(*Message, *net.UDPAddr)
+	OnPingORAnnouncePeerResponse func(*Message, *net.UDPAddr)
 }
 
 func NewProtocol(laddr *net.UDPAddr, eventHandlers ProtocolEventHandlers) (p *Protocol) {
