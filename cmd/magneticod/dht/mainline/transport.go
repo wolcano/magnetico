@@ -16,10 +16,10 @@ type Transport struct {
 	// OnMessage is the function that will be called when Transport receives a packet that is
 	// successfully unmarshalled as a syntactically correct Message (but -of course- the checking
 	// the semantic correctness of the Message is left to Protocol).
-	onMessage func(*Message, net.Addr)
+	onMessage func(*Message, *net.UDPAddr)
 }
 
-func NewTransport(laddr *net.UDPAddr, onMessage func(*Message, net.Addr)) *Transport {
+func NewTransport(laddr *net.UDPAddr, onMessage func(*Message, *net.UDPAddr)) *Transport {
 	transport := new(Transport)
 	transport.onMessage = onMessage
 	transport.laddr = laddr
@@ -85,7 +85,7 @@ func (t *Transport) readMessages() {
 	}
 }
 
-func (t *Transport) WriteMessages(msg *Message, addr net.Addr) {
+func (t *Transport) WriteMessages(msg *Message, addr *net.UDPAddr) {
 	data, err := bencode.Marshal(msg)
 	if err != nil {
 		zap.L().Panic("Could NOT marshal an outgoing message! (Programmer error.)")
